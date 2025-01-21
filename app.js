@@ -3,14 +3,13 @@ const session = require("express-session");
 const path = require("path");
 const http = require("http");
 const socket = require("socket.io");
-const cors = require("cors")
 const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo");
 const passportInitializer = require("./passportlocalconfig");
-const Messageobject = require("./utils/messageobject");
 const router = require("./routes/userroutes");
 const messageModel = require("./models/userModel");
-require("dotenv").config()
+const chatMessageModel = require("./models/chats");
+require("dotenv").config();
 const {
   userJoin,
   getcurrentUser,
@@ -18,19 +17,21 @@ const {
   getRoomUsers,
 } = require("./utils/users");
 const passport = require("passport");
+const moment = require("moment");
+const { time } = require("console");
 //
 const app = express();
 const server = http.createServer(app);
-const io = socket(server,{
-  cors:"http://localhost:8000",
-  Credential:true
+const io = socket(server, {
+  cors: "http://localhost:8000",
+  Credential: true,
 });
 
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 //
-const sessionMiddleware =   session({
+const sessionMiddleware = session({
   secret: "security",
   resave: false,
   saveUninitialized: false,
@@ -38,7 +39,7 @@ const sessionMiddleware =   session({
     mongoUrl: process.env.DB_CONNECTION_STRING,
     collectionName: "sessions",
   }),
-})
+});
 
 app.use(sessionMiddleware);
 passportInitializer(passport, getbyemail, getbyid);
@@ -65,44 +66,48 @@ mongoose
 //   if(socket.request.passport.session && socket.request.session.passport.user){
 //     console.log("Authorised user")
 //     next()
-    
+
 //   }
 //   console.log("UNAuthorised user")
 //   next(new Error("UnAuthorised"))
 // })
 
-
-async function getbyemail (email){
+async function getbyemail(email) {
   return await messageModel.findOne({ email });
-};
-async function getbyid (id){
+}
+async function getbyid(id) {
   return await messageModel.findById(id);
-};
-
+}
 
 const botname = "Bot";
 io.on("connection", (socket) => {
   //authenticate middleware
 
   //catch username and room
-  socket.on("joinroom", ({ username, room }) => {
+  socket.on("joinroom", async ({ username, room }) => {
     //join the room
 
     const user = userJoin(socket.id, username, room);
     socket.join(user.room);
+
+    //chat history
+    const loadhistory = await chatMessageModel
+      .find({ room })
+      .sort({ createdAt: 1 });
+    socket.emit("loadmessages", loadhistory);
     // welcome message to all
-    socket.emit(
-      "message",
-      Messageobject(botname, ` Hello!welcome ${user.username}`)
-    );
+    socket.emit("message", {
+      username: botname,
+      text: `Hello! Welcome ${user.username}`,
+      time: moment().format("h:mm a"),
+    });
 
     //when user joins broadcast this
-    socket.broadcast
-      .to(user.room)
-      .emit(
-        "message",
-        Messageobject(botname, `${user.username} has joined the chat`)
-      );
+    socket.broadcast.to(user.room).emit("message", {
+      username: botname,
+      text: `${user.username} has joined the chat`,
+      time: moment().format("h:mm a"),
+    });
 
     //send users and roomName
 
@@ -112,17 +117,30 @@ io.on("connection", (socket) => {
     });
   });
   //listen for chatmessage
-  socket.on("chatMessage", (message) => {
+  socket.on("chatMessage", async (message) => {
     const user = getcurrentUser(socket.id);
-    io.to(user.room).emit("message", Messageobject(user.username, message));
+    if (user) {
+      const chatData = new chatMessageModel({
+        username: user.username,
+        text: message,
+        room: user.room,
+        time: moment().format("h:mm a"),
+      });
+      await chatData.save();
+      io.to(user.room).emit("message", {
+        username: chatData.username,
+        text: chatData.text,
+        time: chatData.time,
+      });
+    }
   });
   socket.on("disconnect", () => {
     const user = leftUser(socket.id);
     if (user) {
-      io.to(user.room).emit(
-        "message",
-        Messageobject(botname, `${user.username} has left the chat`)
-      );
+      io.to(user.room).emit("message", {
+        username: botname,
+        text: `${user.username} has left the chat`,
+      });
       io.to(user.room).emit("userRoom", {
         room: user.room,
         users: getRoomUsers(user.room),

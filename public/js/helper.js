@@ -20,6 +20,11 @@ socket.on("userRoom", ({ room, users }) => {
   displayRoomname(room);
   displayUsers(users);
 });
+socket.on("loadmessages",(previousmessages)=>{
+  previousmessages.forEach(message => {
+    displayMessage(message)
+  });
+})
 
 socket.on("message", (data) => {
   displayMessage(data);
