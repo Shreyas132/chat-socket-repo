@@ -1,12 +1,12 @@
-const chatMessageModel = require("../models/chats")
-const moment = require("moment")
-const Messageobject =new chatMessageModel ({
-  
-        username:username,
-        text:text,
-        room:room,
-        time:moment().format('h:mm a')
-    
-})
+// const chatMessageModel = require("../models/chats");
+// const moment = require("moment");
+// const Messageobject = new chatMessageModel({
+//   username: username,
+//   text: text,
+//   room: room,
+//   time: moment().format("h:mm a"),
+// });
 
-module.exports = Messageobject
+// Messageobject.save();
+
+// module.exports = Messageobject

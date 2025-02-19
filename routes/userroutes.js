@@ -1,6 +1,6 @@
 const express = require("express");
 const path = require("path");
-const validate = require("../validate")
+const {validateRegister,validate} = require("../validate")
 const {
   handleRegister,
   getRegister,
@@ -14,7 +14,7 @@ router.get("/",(req,res)=>{
   res.redirect('/userlogin')
 })
 router.get("/register", getRegister);
-router.post("/register", handleRegister);
+router.post("/register",validateRegister, handleRegister);
 router.get("/userlogin", getLogin);
 router.post("/userlogin",validate, handleLogin);
 router.post("/logout",handleLogout)

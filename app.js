@@ -18,7 +18,7 @@ const {
 } = require("./utils/users");
 const passport = require("passport");
 const moment = require("moment");
-const { time } = require("console");
+const flash = require("express-flash");
 //
 const app = express();
 const server = http.createServer(app);
@@ -39,9 +39,13 @@ const sessionMiddleware = session({
     mongoUrl: process.env.DB_CONNECTION_STRING,
     collectionName: "sessions",
   }),
+  cookie:{
+    maxAge:1000 * 60 * 60 * 24
+  }
 });
 
 app.use(sessionMiddleware);
+app.use(flash())
 passportInitializer(passport, getbyemail, getbyid);
 app.use(passport.initialize());
 app.use(passport.session());
@@ -58,19 +62,6 @@ mongoose
 
 //
 
-// io.use((socket,next)=>{
-//   sessionMiddleware(socket.request,{},next)
-// })
-
-// io.use((socket,next)=>{
-//   if(socket.request.passport.session && socket.request.session.passport.user){
-//     console.log("Authorised user")
-//     next()
-
-//   }
-//   console.log("UNAuthorised user")
-//   next(new Error("UnAuthorised"))
-// })
 
 async function getbyemail(email) {
   return await messageModel.findOne({ email });
@@ -97,14 +88,14 @@ io.on("connection", (socket) => {
     socket.emit("loadmessages", loadhistory);
     // welcome message to all
     socket.emit("message", {
-      username: botname,
+      type: "system",
       text: `Hello! Welcome ${user.username}`,
       time: moment().format("h:mm a"),
     });
 
     //when user joins broadcast this
     socket.broadcast.to(user.room).emit("message", {
-      username: botname,
+      type:"system",
       text: `${user.username} has joined the chat`,
       time: moment().format("h:mm a"),
     });
@@ -138,6 +129,7 @@ io.on("connection", (socket) => {
     const user = leftUser(socket.id);
     if (user) {
       io.to(user.room).emit("message", {
+        type:"system",
         username: botname,
         text: `${user.username} has left the chat`,
       });

@@ -3,7 +3,7 @@ const passport = require("passport");
 const bcrypt = require("bcrypt");
 
 const getRegister = (req, res) => {
-  res.render("register");
+  res.render("register", { messages: { error: req.flash("error") } });
 };
 const handleRegister = async (req, res) => {
   console.log(req.body);
@@ -22,7 +22,7 @@ const handleRegister = async (req, res) => {
     });
     await createnewuser.save();
     console.log(createnewuser);
-    res.redirect("/userlogin")
+    res.redirect("/userlogin");
   } catch (error) {
     res.status(500).send("internal server error");
   }
@@ -54,10 +54,13 @@ const getLogin = (req, res) => {
 
 } */
 
-const handleLogin = passport.authenticate("local", {
-  successRedirect: "/joinroom",
-  failureRedirect: "/register",
-});
+const handleLogin = (req, res, next) => {
+  passport.authenticate("local", {
+    successRedirect: "/joinroom",
+    failureRedirect: "/register",
+    failureFlash: true,
+  })(req, res, next);
+};
 
 const handleLogout = (req, res) => {
   req.logout((err) => {
@@ -75,7 +78,6 @@ const handleLogout = (req, res) => {
     });
   });
 };
-
 
 module.exports = {
   handleRegister,

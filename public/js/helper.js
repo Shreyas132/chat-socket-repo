@@ -2,15 +2,18 @@ const chatRoom = document.getElementById("chat-form");
 const chatMessages = document.querySelector(".chat-messages");
 const rooName = document.getElementById("room-name");
 const userList = document.getElementById("users");
-const socket = io('http://localhost:8000', {
-    withCredentials: true
+const emoji_btn = document.getElementById("emoji-button");
+const joinedas = document.getElementById("joined-as");
+const socket = io("http://localhost:8000", {
+  withCredentials: true,
 });
 
 //to get query values
 const { username, room } = Qs.parse(location.search, {
   ignoreQueryPrefix: true,
 });
-const currentusername = username
+
+const currentusername = username;
 console.log(username, room);
 //join room
 socket.emit("joinroom", { username, room });
@@ -20,15 +23,16 @@ socket.on("userRoom", ({ room, users }) => {
   displayRoomname(room);
   displayUsers(users);
 });
-socket.on("loadmessages",(previousmessages)=>{
-  previousmessages.forEach(message => {
-    displayMessage(message)
+socket.on("loadmessages", (previousmessages) => {
+  previousmessages.forEach((message) => {
+    displayMessage(message);
   });
-})
+});
 
 socket.on("message", (data) => {
+  console.log("username", data.username);
   displayMessage(data);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
+  chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: "smooth" });
 });
 
 //message submit
@@ -50,24 +54,49 @@ const displayMessage = (message) => {
   const div = document.createElement("div");
   div.classList.add("message"); //adds message div from chat.html
 
-  if(message.username === currentusername) {
-    div.classList.add("send")
-  }else{
-    div.classList.add("received")
+  if (message.type === "system") {
+    div.classList.add("system-greet");
+  } else {
+    if (message.username === currentusername) {
+      div.classList.add("send");
+    } else {
+      div.classList.add("received");
+    }
   }
   div.innerHTML = `<p class="meta">${message.username}<span class="time">${message.time}</span></p>
             <p class="text">
-              
             ${message.text}
             </p>`;
   document.querySelector(".chat-messages").appendChild(div);
 };
+const pickerOptions = {
+  onEmojiSelect: (emoji) => {
+    const msginput = document.getElementById("msg");
+    msginput.value += emoji.native;
+  },
+};
+const picker = new EmojiMart.Picker(pickerOptions);
+picker.classList.add("emoji-picker");
+document.body.appendChild(picker);
+
+emoji_btn.addEventListener("click", () => {
+  const pickerElement = document.querySelector(".emoji-picker");
+  pickerElement.style.display =
+    pickerElement.style.display === "none" ? "block" : "none";
+  const rect = emoji_btn.getBoundingClientRect();
+  pickerElement.style.top = `${
+    rect.top - pickerElement.offsetHeight - 5 + window.scrollY
+  }px`;
+  pickerElement.style.center = `${rect.right + window.scrollX}px`;
+});
 
 function displayRoomname(room) {
   rooName.innerHTML = room;
 }
 
 function displayUsers(users) {
+  joinedas.textContent = "Joined as: " + currentusername ;
+
   userList.innerHTML = `
     ${users.map((user) => `<li>${user.username}</li>`).join("")}
     `;

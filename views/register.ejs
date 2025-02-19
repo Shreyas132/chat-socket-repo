@@ -1,6 +1,11 @@
 <link rel="stylesheet" href="/css/loginout.css" />
 
 <form action="/register" method="post">
+  <div>
+    <% if(messages.error) { %>
+    <div class="alert"><%= messages.error %></div>
+    <%}%>
+  </div>
   <h1>Register</h1>
   <div>
     <label for="username">Username:</label>
