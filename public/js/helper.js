@@ -33,6 +33,10 @@ socket.on("message", (data) => {
   console.log("username", data.username);
   displayMessage(data);
   chatMessages.scrollTo({ top: chatMessages.scrollHeight, behavior: "smooth" });
+
+  if(data.username !== currentusername){
+    document.getElementById("received-sound").play()
+  }
 });
 
 //message submit
@@ -43,8 +47,12 @@ chatRoom.addEventListener("submit", (e) => {
   const message = e.target.elements.msg.value;
 
   //emit to server
-  socket.emit("chatMessage", message);
-
+  
+  //play sounds
+  if(message.trim() !== ""){
+    socket.emit("chatMessage", message);
+    document.getElementById("sent-sound").play()
+  }
   //clear input
   e.target.elements.msg.value = "";
   e.target.elements.msg.focus();
@@ -95,7 +103,7 @@ function displayRoomname(room) {
 }
 
 function displayUsers(users) {
-  joinedas.textContent = "Joined as: " + currentusername ;
+  joinedas.textContent = "Joined as: " + currentusername;
 
   userList.innerHTML = `
     ${users.map((user) => `<li>${user.username}</li>`).join("")}

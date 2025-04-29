@@ -41,8 +41,12 @@
             required
             autocomplete="off"
           />
+          <div class="file-upload">
+            <i class="fas fa-paperclip"></i>
+            <input type="file" id="file-upload" name="file" />
+          </div>
           <button type="button" id="emoji-button">
-            <i class="fa-solid fa-3x fa-face-smile"></i> 
+            <i class="fa-solid fa-3x fa-face-smile"></i>
           </button>
           <button class="btn"><i class="fas fa-paper-plane"></i> Send</button>
         </form>
@@ -56,5 +60,7 @@
     ></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/helper.js"></script>
+    <audio id="sent-sound" src="/sounds/sent.mp3" preload="auto"></audio>
+    <audio id="received-sound" src="/sounds/receivetwo.wav" preload="auto"></audio>
   </body>
 </html>

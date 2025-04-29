@@ -32,20 +32,20 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 //
 const sessionMiddleware = session({
-  secret: "security",
+  secret: process.env.SECRET,
   resave: false,
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: process.env.DB_CONNECTION_STRING,
     collectionName: "sessions",
   }),
-  cookie:{
-    maxAge:1000 * 60 * 60 * 24
-  }
+  cookie: {
+    maxAge: 1000 * 60 * 60 * 24,
+  },
 });
 
 app.use(sessionMiddleware);
-app.use(flash())
+app.use(flash());
 passportInitializer(passport, getbyemail, getbyid);
 app.use(passport.initialize());
 app.use(passport.session());
@@ -61,7 +61,6 @@ mongoose
   .catch((error) => console.log("error while connectig database", error));
 
 //
-
 
 async function getbyemail(email) {
   return await messageModel.findOne({ email });
@@ -95,7 +94,7 @@ io.on("connection", (socket) => {
 
     //when user joins broadcast this
     socket.broadcast.to(user.room).emit("message", {
-      type:"system",
+      type: "system",
       text: `${user.username} has joined the chat`,
       time: moment().format("h:mm a"),
     });

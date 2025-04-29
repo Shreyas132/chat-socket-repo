@@ -1,23 +1,26 @@
 const express = require("express");
 const path = require("path");
-const {validateRegister,validate} = require("../validate")
+const maxrateLimit = require("../utils/rateLimit");
+const { validateRegister, validate } = require("../validate");
 const {
   handleRegister,
   getRegister,
   getLogin,
   handleLogin,
-  handleLogout
+  handleLogout,
 } = require("../controllers/user");
+const { max } = require("moment");
+const { header } = require("express-validator");
 const router = express.Router();
 
-router.get("/",(req,res)=>{
-  res.redirect('/userlogin')
-})
+router.get("/", (req, res) => {
+  res.redirect("/userlogin");
+});
 router.get("/register", getRegister);
-router.post("/register",validateRegister, handleRegister);
+router.post("/register", validateRegister, handleRegister);
 router.get("/userlogin", getLogin);
-router.post("/userlogin",validate, handleLogin);
-router.post("/logout",handleLogout)
+router.post("/userlogin", maxrateLimit, validate, handleLogin);
+router.post("/logout", handleLogout);
 router.get("/joinroom", checkAuth, (req, res) => {
   res.render("index");
 });
@@ -25,7 +28,6 @@ router.get("/joinroom", checkAuth, (req, res) => {
 router.get("/chatwindow", checkAuth, (req, res) => {
   res.render("chat");
 });
-
 
 function checkAuth(req, res, next) {
   if (req.isAuthenticated()) {
