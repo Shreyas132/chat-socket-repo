@@ -12,6 +12,10 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.css"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
 
     <link rel="stylesheet" href="/css/index.css" />
     <title>Thechat App</title>
@@ -31,6 +35,7 @@
           <ul id="users"></ul>
         </div>
         <div class="chat-messages"></div>
+        <div id="filePreview" class="preview-box"></div>
       </main>
       <div class="chat-form-container">
         <form id="chat-form">
@@ -38,12 +43,20 @@
             id="msg"
             type="text"
             placeholder="Enter Message"
-            required
             autocomplete="off"
           />
           <div class="file-upload">
-            <i class="fas fa-paperclip"></i>
-            <input type="file" id="file-upload" name="file" />
+            <i
+              class="fas fa-paperclip"
+              id="file-icon"
+              style="cursor: pointer"
+            ></i>
+            <input
+              type="file"
+              id="file-upload"
+              name="file"
+              style="display: none"
+            />
           </div>
           <button type="button" id="emoji-button">
             <i class="fa-solid fa-3x fa-face-smile"></i>
@@ -61,6 +74,10 @@
     <script src="/socket.io/socket.io.js"></script>
     <script src="/js/helper.js"></script>
     <audio id="sent-sound" src="/sounds/sent.mp3" preload="auto"></audio>
-    <audio id="received-sound" src="/sounds/receivetwo.wav" preload="auto"></audio>
+    <audio
+      id="received-sound"
+      src="/sounds/receivetwo.wav"
+      preload="auto"
+    ></audio>
   </body>
 </html>

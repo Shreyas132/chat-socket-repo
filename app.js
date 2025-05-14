@@ -7,6 +7,7 @@ const mongoose = require("mongoose");
 const MongoStore = require("connect-mongo");
 const passportInitializer = require("./passportlocalconfig");
 const router = require("./routes/userroutes");
+const uploadrouter = require("./routes/fileuploadroutes")
 const messageModel = require("./models/userModel");
 const chatMessageModel = require("./models/chats");
 require("dotenv").config();
@@ -19,6 +20,7 @@ const {
 const passport = require("passport");
 const moment = require("moment");
 const flash = require("express-flash");
+const { type } = require("os");
 //
 const app = express();
 const server = http.createServer(app);
@@ -52,15 +54,17 @@ app.use(passport.session());
 
 //
 app.set("view engine", "ejs");
-app.use(router);
-//
 
+//
 mongoose
   .connect(process.env.DB_CONNECTION_STRING)
   .then(() => console.log("Db connected succesfully"))
   .catch((error) => console.log("error while connectig database", error));
 
 //
+app.use(router);
+app.use(uploadrouter)
+
 
 async function getbyemail(email) {
   return await messageModel.findOne({ email });
@@ -112,15 +116,25 @@ io.on("connection", (socket) => {
     if (user) {
       const chatData = new chatMessageModel({
         username: user.username,
-        text: message,
+        text: message.text || null,
+        type:message.filename ? "file" : "text",
+        filename:message.filename || null,
+        originalname:message.originalname || null,
         room: user.room,
         time: moment().format("h:mm a"),
+        url:message.url,
+        size:message.size,
       });
       await chatData.save();
       io.to(user.room).emit("message", {
         username: chatData.username,
         text: chatData.text,
+        type:chatData.type,
+        filename:chatData.filename,
+        originalname:chatData.originalname,
         time: chatData.time,
+        url:chatData.url,
+        size:chatData.size,
       });
     }
   });

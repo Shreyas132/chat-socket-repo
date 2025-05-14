@@ -199,37 +199,23 @@ body {
   margin-right: 10px;
 }
 /* upload file style*/
-.file-upload {
-  position: relative;
-  display: inline-block;
-  cursor: pointer;
-}
-.file-upload i {
-  font-size: 1.5rem;
-  color: #7386ff;
-  margin-right: 10px;
-}
-.file-upload input[type="file"] {
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-#file-name {
-  display: inline-block;
-  margin-left: 10px;
-  font-size: 0.9rem;
-  color: #666;
-  max-width: 150px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  vertical-align: middle;
+.chat-image {
+  max-width: 300px;
+  margin-top: 10px;
+  border-radius: 8px;
+  display: block;
 }
 
+.file-link {
+  color: #007bff;
+  font-weight: 500;
+  text-decoration: none;
+  margin-top: 5px;
+  display: inline-block;
+}
+.file-link:hover {
+  text-decoration: underline;
+}
 /* Join Page */
 .join-container {
   max-width: 44rem;
